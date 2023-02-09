@@ -8,12 +8,14 @@ const saltRounds = 10;
 
 const User = require('../models/User.model')
 
+const { isLoggedIn, isLoggedOut } = require('../middleware/route-guard.js');
+
 /* GET users listing. */
-router.get('/signup', (req, res, next) => {
+router.get('/signup', isLoggedOut, (req, res, next) => {
   res.render('auth/signup.hbs');
 });
 
-router.post('/signup', (req, res, next) => {
+router.post('/signup', isLoggedOut, (req, res, next) => {
   console.log('The form data: ', req.body);
 
   const { username, email, password } = req.body;
@@ -66,11 +68,11 @@ router.post('/signup', (req, res, next) => {
 
 })
 
-router.get('/login', (req, res, next) => {
+router.get('/login', isLoggedOut, (req, res, next) => {
   res.render('auth/login.hbs')
 })
 
-router.post('/login', (req, res, next) => {
+router.post('/login', isLoggedOut, (req, res, next) => {
   const { email, password } = req.body;
  
   if (!email || !password) {
@@ -96,13 +98,13 @@ router.post('/login', (req, res, next) => {
     .catch(error => next(error));
 });
 
-router.get('/profile', (req, res, next) => {
+router.get('/profile', isLoggedIn, (req, res, next) => {
   const user = req.session.user
   console.log('SESSION =====> ', req.session);
   res.render('users/user-profile.hbs', { user })
 })
 
-router.get('/logout', (req, res, next) => {
+router.get('/logout', isLoggedIn, (req, res, next) => {
   req.session.destroy(err => {
     if (err) next(err);
     res.redirect('/');
