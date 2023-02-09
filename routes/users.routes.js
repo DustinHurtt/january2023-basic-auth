@@ -49,7 +49,7 @@ router.post('/signup', (req, res, next) => {
     })
     .then((userFromDB) => {
       console.log('Newly created user is: ', userFromDB);
-      res.redirect('/users/profile')
+      res.redirect('/users/login')
     })
     .catch(error => {
       if (error instanceof mongoose.Error.ValidationError) {
@@ -66,8 +66,47 @@ router.post('/signup', (req, res, next) => {
 
 })
 
-router.get('/profile', (req, res, next) => {
-  res.render('users/user-profile.hbs')
+router.get('/login', (req, res, next) => {
+  res.render('auth/login.hbs')
 })
+
+router.post('/login', (req, res, next) => {
+  const { email, password } = req.body;
+ 
+  if (!email || !password) {
+    res.render('auth/login.hbs', {
+      errorMessage: 'Please enter both, email and password to login.'
+    });
+    return;
+  }
+ 
+  User.findOne({ email })
+    .then(user => {
+      if (!user) {
+        res.render('auth/login', { errorMessage: 'Email is not registered. Try with other email.' });
+        return;
+      } else if (bcryptjs.compareSync(password, user.passwordHash)) {
+        req.session.user = user
+        console.log('SESSION =====> ', req.session);
+        res.redirect('/users/profile');
+      } else {
+        res.render('auth/login', { errorMessage: 'Incorrect password.' });
+      }
+    })
+    .catch(error => next(error));
+});
+
+router.get('/profile', (req, res, next) => {
+  const user = req.session.user
+  console.log('SESSION =====> ', req.session);
+  res.render('users/user-profile.hbs', { user })
+})
+
+router.get('/logout', (req, res, next) => {
+  req.session.destroy(err => {
+    if (err) next(err);
+    res.redirect('/');
+  });
+});
 
 module.exports = router;
