@@ -9,7 +9,7 @@
     </label>
 
     <label> Email
-      <input type="email" name="email" placeholder="rockstar@ironhack.com" />
+      <input type="string" name="email" placeholder="rockstar@ironhack.com" />
     </label>
 
     <label> Password
@@ -20,4 +20,8 @@
 
     {{!-- error message will be added here --}}
   </form>
+
+  {{#if errorMessage}}
+        <p class="error">{{errorMessage}}</p>
+  {{/if}}
 </div>
